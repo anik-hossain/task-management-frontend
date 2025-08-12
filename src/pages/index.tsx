@@ -1,7 +1,9 @@
+import Button from '@components/common/Button';
+
 const Index = () => {
     return (
         <div>
-            home
+            <Button />
         </div>
     );
 }
