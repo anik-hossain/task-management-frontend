@@ -22,6 +22,11 @@ import {
 import { Input } from "@/components/ui/input"
 import apiService from "@/utils/api"
 import { toast } from "sonner"
+import { useNavigate } from "react-router-dom"
+
+type Response = {
+    accessToken: string
+}
 
 const FormSchema = z.object({
     email: z.string({error: "Email is required"}).email("Invalid email address"),
@@ -29,6 +34,8 @@ const FormSchema = z.object({
 })
 
 export default function InputForm() {
+    const navigate = useNavigate()
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -39,7 +46,9 @@ export default function InputForm() {
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
-          await apiService.post('/auth/login', data)
+          const response: Response = await apiService.login(data)
+          localStorage.setItem('token', response.accessToken)
+            navigate('/')
           toast("Logged in successfully.", {style: { background: '#4caf50', color: '#fff' }})
         } catch (error) {
             toast("Invalid credentials.", {style: { background: '#f44336', color: '#fff' }})

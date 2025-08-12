@@ -14,10 +14,9 @@ class ApiService {
       },
     })
 
-    // Request interceptor to add token
     this.api.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token') // Retrieve token from localStorage
+        const token = localStorage.getItem('token')
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
@@ -27,25 +26,27 @@ class ApiService {
     )
   }
 
-  // GET request
+  // Login request
+  async login<T>(credentials: { email: string; password: string }): Promise<T> {
+    const response = await this.api.post<T>('/auth/login', credentials)
+    return response.data
+  }
+
   async get<T>(endpoint: string, params?: Record<string, any>): Promise<T> {
     const response = await this.api.get<T>(endpoint, { params })
     return response.data
   }
 
-  // POST request
   async post<T>(endpoint: string, data: any): Promise<T> {
     const response = await this.api.post<T>(endpoint, data)
     return response.data
   }
 
-  // PUT request
   async put<T>(endpoint: string, data: any): Promise<T> {
     const response = await this.api.put<T>(endpoint, data)
     return response.data
   }
 
-  // DELETE request
   async delete<T>(endpoint: string): Promise<T> {
     const response = await this.api.delete<T>(endpoint)
     return response.data
