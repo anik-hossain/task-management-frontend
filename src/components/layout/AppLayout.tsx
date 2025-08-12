@@ -1,3 +1,5 @@
+import { Toaster } from "@/components/ui/sonner"
+
 interface AppLayoutProps {
   children: React.ReactNode
 }
@@ -5,8 +7,8 @@ interface AppLayoutProps {
 function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="app-layout">
-      <div>header</div>
       <main>{children}</main>
+      <Toaster />
     </div>
   )
 }
