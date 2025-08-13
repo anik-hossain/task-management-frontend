@@ -1,38 +1,59 @@
 import apiService from '@/utils/api';
 import { useState, useEffect, useContext, createContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from "sonner"
 
 // Define User interface
 interface User {
   id: string;
+  name: string;
+  email: string;
   role: 'admin' | 'manager' | 'user';
-  username: string;
 }
 
 // Define AuthContext type
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
 }
 
 // Create AuthContext
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+type Response = {
+    accessToken: string
+    user: User
+}
+
 // AuthProvider component to wrap the app
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>({id: '1', role: 'admin', username: 'admin'});
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const navigate = useNavigate()
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const login = async (email: string, password: string) => {
+     try {
+            const response: Response = await apiService.login({ email, password });
+            localStorage.setItem('token', response.accessToken)
+            setUser(response.user);
+            setIsAuthenticated(true);
+            
+            navigate('/')
+            toast("Logged in successfully.", { style: { background: '#4caf50', color: '#fff' } })
+        } catch (error) {
+            toast("Invalid credentials.", { style: { background: '#f44336', color: '#fff' } })
+        }
+  }
 
   useEffect(() => {
     // Check for existing auth token on mount (e.g., from localStorage or backend)
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('token');
         if (token) {
-          const response = await apiService.get('http://localhost:3000/api/auth/me', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          console.log('User data:', response);
-          // setUser(response.user);
+          const response = await apiService.get('/auth/me') as User
+          setUser(response);
           setIsAuthenticated(true);
         }
       } catch (error) {
@@ -46,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login }}>
       {children}
     </AuthContext.Provider>
   );

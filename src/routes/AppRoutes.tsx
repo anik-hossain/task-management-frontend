@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth'
 import Register from '@/pages/register'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = !!localStorage.getItem('token')
+  const { isAuthenticated } = useAuth();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
@@ -19,13 +19,13 @@ const RoleBasedRoute: React.FC<{
   const { user } = useAuth();
   
   if (!user || !allowedRoles.includes(user.role)) {
-    return <Navigate to="/unauthorized" />;
+    return <Navigate to="/login" />;
   }
   return element;
 };
 
 function AppRoutes() {
-  const isAuthenticated = !!localStorage.getItem('token')
+  const { isAuthenticated } = useAuth();
 
   return (
     <Routes>
