@@ -5,6 +5,7 @@ import NotFound from '@pages/not-found'
 import { JSX } from 'react'
 import Dashboard from '@/pages/dashboard'
 import { useAuth } from '@/hooks/useAuth'
+import Register from '@/pages/register'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!localStorage.getItem('token')
@@ -39,6 +40,10 @@ function AppRoutes() {
       <Route
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
+      />
+      <Route
+        path="/register"
+        element={isAuthenticated ? <Navigate to="/" replace /> : <Register />}
       />
       <Route
         path="/dashboard"

@@ -27,8 +27,9 @@ type Response = {
 }
 
 const FormSchema = z.object({
+    name: z.string({error: "Name is required"}).email("Invalid email address"),
     email: z.string({error: "Email is required"}).email("Invalid email address"),
-    password: z.string({error: "Password is required"}).min(1, "Password is required"),
+    password: z.string({error: "Password is required"}).min(6, "Password must be at least 6 characters long"),
 })
 
 export default function InputForm() {
@@ -37,14 +38,15 @@ export default function InputForm() {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            email: 'anik.wdev@gmail.com',
-            password: '12345678',
+            name: undefined,
+            email: undefined,
+            password: undefined,
         },
     })
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
-          const response: Response = await apiService.login(data)
+          const response: Response = await apiService.register(data)
           localStorage.setItem('token', response.accessToken)
             navigate('/')
           toast("Logged in successfully.", {style: { background: '#4caf50', color: '#fff' }})
@@ -57,11 +59,24 @@ export default function InputForm() {
         <div className="mt-8 flex-col items-center justify-center h-screen lg:flex">
             <Card className="w-11/12 mx-auto lg:w-1/3">
                 <CardHeader>
-                    <CardTitle>Login</CardTitle>
+                    <CardTitle>Register</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Name" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -89,7 +104,7 @@ export default function InputForm() {
                                 )}
                             />
                             <Button type="submit" className="cursor-pointer">Submit</Button>
-                            <p>Don't have an account? <Link to="/register">Login</Link></p>
+                            <p>Already have an account? <Link to="/login">Login</Link></p>
                         </form>
                     </Form>
                 </CardContent>
