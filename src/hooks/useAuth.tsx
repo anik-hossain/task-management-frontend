@@ -16,6 +16,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
 }
 
 // Create AuthContext
@@ -45,6 +46,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             toast("Invalid credentials.", { style: { background: '#f44336', color: '#fff' } })
         }
   }
+  const register = async (name: string, email: string, password: string) => {
+     try {
+            const response: Response = await apiService.register({ name, email, password });
+            localStorage.setItem('token', response.accessToken)
+            setUser(response.user);
+            setIsAuthenticated(true);
+            
+            navigate('/')
+            toast("Register successfully.", { style: { background: '#4caf50', color: '#fff' } })
+        } catch (error) {
+            toast("Invalid credentials.", { style: { background: '#f44336', color: '#fff' } })
+        }
+  }
 
   useEffect(() => {
     // Check for existing auth token on mount (e.g., from localStorage or backend)
@@ -67,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login, register }}>
       {children}
     </AuthContext.Provider>
   );

@@ -78,7 +78,7 @@ export default function InputForm() {
                                 )}
                             />
                             <Button type="submit" className="cursor-pointer">Submit</Button>
-                            <p>Don't have an account? <Link to="/register">Login</Link></p>
+                            <p>Don't have an account? <Link to="/register">Register</Link></p>
                         </form>
                     </Form>
                 </CardContent>
