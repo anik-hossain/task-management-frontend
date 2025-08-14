@@ -7,7 +7,7 @@ interface AppLayoutProps {
 }
 
 function AppLayout({ children }: AppLayoutProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -21,7 +21,7 @@ function AppLayout({ children }: AppLayoutProps) {
           <>
             <Link to="/" className="hover:text-gray-300">Home</Link>
             <Link to="/dashboard" className="hover:text-gray-300">Dashboard</Link>
-            <Link to="/project-timeline" className="hover:text-gray-300">Project Timeline</Link>
+            { (user?.role === 'admin' || user?.role === 'manager' )&& <Link to="/project-timeline" className="hover:text-gray-300">Project Timeline</Link>}
             <button
               onClick={handleLogout}
               className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"

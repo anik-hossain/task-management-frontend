@@ -57,7 +57,7 @@ function AppRoutes() {
         element={
           <RoleBasedRoute
             element={<Dashboard />}
-            allowedRoles={['admin', 'manager', 'user']}
+            allowedRoles={['admin', 'manager', 'member']}
           />
         }
       />
@@ -66,7 +66,7 @@ function AppRoutes() {
         element={
           <RoleBasedRoute
             element={<TaskDetails />}
-            allowedRoles={['admin', 'manager', 'user']}
+            allowedRoles={['admin', 'manager', 'member']}
           />
         }
       />
@@ -79,15 +79,6 @@ function AppRoutes() {
           />
         }
       />
-      {/* <Route
-        path="/reports"
-        element={
-          <RoleBasedRoute
-            element={<ProjectReports />}
-            allowedRoles={['admin', 'manager']}
-          />
-        }
-      /> */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
