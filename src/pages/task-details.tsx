@@ -1,55 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card"
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-
-// Sample tasks data
-const tasks = [
-  {
-    id: "1",
-    title: "Design",
-    description: "Create UI mockups and wireframes",
-    priority: "high",
-    assignee: "Alice",
-    status: "done",
-    startDate: "2025-08-01",
-    endDate: "2025-08-05",
-    dependencies: [],
-  },
-  {
-    id: "2",
-    title: "Development",
-    description: "Implement the features in React",
-    priority: "medium",
-    assignee: "Bob",
-    status: "in-progress",
-    startDate: "2025-08-04",
-    endDate: "2025-08-10",
-    dependencies: ["1"],
-  },
-  {
-    id: "3",
-    title: "Testing",
-    description: "Test the application thoroughly",
-    priority: "low",
-    assignee: "Charlie",
-    status: "todo",
-    startDate: "2025-08-09",
-    endDate: "2025-08-12",
-    dependencies: ["2"],
-  },
-];
+import apiService from "@/utils/api";
+import { format } from "date-fns";
+import getBadgeColor from "@/utils/getStatusBadgeClass";
 
 const TaskDetails: React.FC = () => {
   const navigate = useNavigate();
   const { taskId } = useParams<{ taskId: string }>();
+  const [task, setTask] = React.useState<Task | null>(null);
 
-  const task = tasks.find((t) => t.id === taskId);
+
+  useEffect(() => {
+    const fetchTaskDetails = async () => {
+      const response = await apiService.get(`/tasks/${taskId}`) as Task;
+      setTask(response);
+
+      if (!task) {
+        console.error("Task not found");
+      }
+    }
+    fetchTaskDetails();
+  }, [taskId]);
 
   if (!task) {
     return (
@@ -66,7 +44,7 @@ const TaskDetails: React.FC = () => {
         className="flex items-center gap-2 mb-4"
         onClick={() => navigate(-1)}
       >
-         Back
+        Back
       </Button>
 
       {/* Task Card */}
@@ -75,13 +53,12 @@ const TaskDetails: React.FC = () => {
           <CardTitle className="flex justify-between items-center">
             {task.title}
             <p
-              className={`px-2.5 py-1 rounded-full capitalize text-xs ${
-                task.priority === "high"
+              className={`px-2.5 py-1 rounded-full capitalize text-xs ${task.priority === "high"
                   ? "bg-red-500 text-white"
                   : task.priority === "medium"
-                  ? "bg-yellow-400 text-white"
-                  : "bg-green-500 text-white"
-              }`}
+                    ? "bg-yellow-400 text-white"
+                    : "bg-green-500 text-white"
+                }`}
             >
               {task.priority}
             </p>
@@ -91,25 +68,34 @@ const TaskDetails: React.FC = () => {
         <CardContent className="space-y-3">
           <p className="text-gray-700">{task.description}</p>
 
-          <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+          <div className="flex flex-wrap gap-4 text-sm text-gray-500 flex-col">
             <span>
-              <strong>Assignee:</strong> {task.assignee}
+              <strong>
+                Assignee:{" "}
+                {task.assignees.map((assignee, index) => (
+                  <span key={assignee.id} className="font-medium text-green-500">
+                    {assignee.name}
+                    {index < task.assignees.length - 1 ? ", " : ""}
+                  </span>
+                ))}
+              </strong>
+
             </span>
             <span>
-              <strong>Status:</strong> {task.status}
+              <strong>Status:</strong> <span className={`text-xs text-white px-2.5 h-fit font-medium rounded-full py-1 capitalize ${getBadgeColor(task.status)}`}>{task.status}</span>
             </span>
             <span>
-              <strong>Start Date:</strong> {task.startDate}
+              <strong>Start Date:</strong> {format(new Date(task.start_date), "MMM dd, yyyy")}
             </span>
             <span>
-              <strong>End Date:</strong> {task.endDate}
+              <strong>End Date:</strong> {format(new Date(task.end_date), "MMM dd, yyyy")}
             </span>
           </div>
 
-          {task.dependencies.length > 0 && (
+          {task.dependencies && (
             <div className="mt-2">
               <strong>Dependencies:</strong>{" "}
-              {task.dependencies.join(", ")}
+              {task.dependencies}
             </div>
           )}
 
