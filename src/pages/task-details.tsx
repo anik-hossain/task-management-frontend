@@ -63,11 +63,11 @@ const TaskDetails: React.FC = () => {
     fetchTaskDetails();
   }, [taskId]);
 
-  const handleChangeStatus = async (newStatus: string) => {
+  const handleChangeStatus = async (newStatus: "pending" | "in-progress" | "completed") => {
     if (!task) return;
     try {
-      apiService.patch(`/tasks/${task.id}/status`, { status: newStatus });
-      
+      await apiService.patch(`/tasks/${task.id}/status`, { status: newStatus });
+      setTask((prev) => (prev ? { ...prev, status: newStatus } : null));
     } catch (error) {
       console.error("Failed to update status:", error);
     }
@@ -162,7 +162,7 @@ const TaskDetails: React.FC = () => {
                 key={status}
                 variant="default"
                 className="bg-green-500 text-white hover:bg-green-600"
-                onClick={() => handleChangeStatus(status)}
+                onClick={() => handleChangeStatus(status as "pending" | "in-progress" | "completed")}
               >
                 Mark as {status}
               </Button>
