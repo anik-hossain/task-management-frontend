@@ -66,7 +66,7 @@ const TaskDetails: React.FC = () => {
   const handleChangeStatus = async (newStatus: string) => {
     if (!task) return;
     try {
-      console.log(newStatus);
+      apiService.patch(`/tasks/${task.id}/status`, { status: newStatus });
       
     } catch (error) {
       console.error("Failed to update status:", error);
