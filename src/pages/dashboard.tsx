@@ -6,9 +6,11 @@ import CreateTask from '@/components/CreateTask';
 import { fetchTasks } from '@/store/slices/taskSlice';
 import TaskCard2 from '@/components/TaskCard2';
 import TaskCardSkeleton from '@/components/skeletons/TaskCard';
+import { useAuth } from '@/hooks/useAuth';
 
 const Dashboard: React.FC = () => {
 
+  const { user } = useAuth()
   const dispatch = useDispatch<AppDispatch>();
 
   const { tasks, status } = useSelector((state: RootState) => state.tasks);
@@ -48,6 +50,7 @@ const Dashboard: React.FC = () => {
             task={task}
             onUpdate={handleUpdateTask}
             usersOnline={['user1', 'user2', 'user3']}
+            role={user?.role}
           />
         ))}
       </div>
