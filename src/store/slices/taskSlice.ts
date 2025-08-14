@@ -63,7 +63,16 @@ const taskSlice = createSlice({
       state.tasks = [];
       state.status = 'idle';
       state.error = null;
-    }
+    },
+    updateTaskInStore(
+      state,
+      action: PayloadAction<{ taskId: string; updates: Partial<Task> }>
+    ) {
+      const index = state.tasks.findIndex(t => t.id === action.payload.taskId);
+      if (index !== -1) {
+        state.tasks[index] = { ...state.tasks[index], ...action.payload.updates };
+      }
+    },
   },
   extraReducers: (builder) => {
     // Fetch tasks
@@ -92,5 +101,5 @@ const taskSlice = createSlice({
   }
 });
 
-export const { clearTasks } = taskSlice.actions;
+export const { clearTasks, updateTaskInStore } = taskSlice.actions;
 export default taskSlice.reducer;
