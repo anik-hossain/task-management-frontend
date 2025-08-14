@@ -1,4 +1,5 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -37,20 +38,32 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import apiService from '@/utils/api';
+import { AppDispatch } from '@/store';
+import { createTask, fetchTasks } from '@/store/slices/taskSlice';
 
 interface Props {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
 }
 
+type Assignee = {
+    id: string;
+    name: string;
+    email: string;
+}
+
 const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
 
+    const dispatch = useDispatch<AppDispatch>();
     const [openCal1, setOpenCal1] = useState(false)
     const [openCal2, setOpenCal2] = useState(false)
+    const [assignees, setAssignees] = useState<Assignee[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const FormSchema = z.object({
-        title: z.string({error: "Title is required"}),
-        assignee: z.string({error: "Assignee is required"}),
+        title: z.string({ error: "Title is required" }),
+        assignee: z.array(z.any()).nonempty({ message: "At least one assignee is required" }),
         description: z.string().optional(),
         priority: z.string().optional(),
         startDate: z.string({ error: "Start date is required" }),
@@ -83,7 +96,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
         resolver: zodResolver(FormSchema),
         defaultValues: {
             title: undefined,
-            assignee: undefined,
+            assignee: [],
             description: undefined,
             priority: 'low',
             endDate: undefined,
@@ -93,8 +106,44 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
     })
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        console.log(data);
+        try {
+            setIsSubmitting(true);
+            const resultAction = await dispatch(createTask({
+                title: data.title,
+                description: data.description,
+                priority: data.priority,
+                status: 'pending',
+                assignee: data.assignee,
+                start_date: data.startDate,
+                end_date: data.endDate,
+            }));
+
+            if (createTask.fulfilled.match(resultAction)) {
+                setIsOpen(false);
+                dispatch(fetchTasks());
+            } else {
+                console.error('Task creation failed:', resultAction.payload);
+            }
+        } catch (error) {
+            console.error('Error creating task:', error);
+        }finally{
+            setIsSubmitting(false);
+        }
     }
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const fetchAssignees = await apiService.get('/users') as Assignee[];
+                setAssignees(fetchAssignees);
+            } catch (error) {
+                console.error('Error fetching assignees:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -114,7 +163,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                                     <FormItem>
                                         <FormLabel>Title</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Title" {...field} />
+                                            <Input placeholder="Title" {...field} value={field.value} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -125,22 +174,58 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                                 name="assignee"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Assignee</FormLabel>
-                                        <FormControl>
-                                            <Select value={field.value} onValueChange={field.onChange}>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Assignee" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="low">Anik</SelectItem>
-                                                    <SelectItem value="medium">Muhammad</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </FormControl>
+                                        <FormLabel>Assignees</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" className="w-full justify-between">
+                                                    {field.value.length > 0
+                                                        ? `${field.value.length} selected`
+                                                        : "Select assignees"}
+                                                    <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[300px] p-0">
+                                                <div className="max-h-[200px] overflow-y-auto">
+                                                    {assignees.map((person) => {
+                                                        const isSelected = field.value.includes(person.id);
+                                                        return (
+                                                            <div
+                                                                key={person.id}
+                                                                className="flex cursor-pointer items-center space-x-2 px-3 py-2 hover:bg-accent"
+                                                                onClick={() => {
+                                                                    if (isSelected) {
+                                                                        field.onChange(
+                                                                            field.value.filter((id) => id !== person.id)
+                                                                        );
+                                                                    } else {
+                                                                        field.onChange([...field.value, person.id]);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Checkbox
+                                                                    checked={isSelected}
+                                                                    onCheckedChange={(checked) => {
+                                                                        if (checked) {
+                                                                            field.onChange([...field.value, person.id]);
+                                                                        } else {
+                                                                            field.onChange(
+                                                                                field.value.filter((id) => id !== person.id)
+                                                                            );
+                                                                        }
+                                                                    }}
+                                                                />
+                                                                <span className="text-sm">{person.name}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
+
                         </div>
                         <FormField
                             control={form.control}
@@ -261,9 +346,9 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                                     <div className="mb-4">
                                         <FormLabel className="text-base">Dependencies</FormLabel>
                                     </div>
-                                    {dependencies.map((item) => (
+                                    {dependencies.map((item, index) => (
                                         <FormField
-                                            key={item.id}
+                                            key={index}
                                             control={form.control}
                                             name="dependencies"
                                             render={({ field }) => {
@@ -303,7 +388,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                             <DialogClose asChild>
                                 <Button variant="outline" className='cursor-pointer'>Cancel</Button>
                             </DialogClose>
-                            <Button type="submit" className='cursor-pointer'>Create</Button>
+                            <Button type="submit" className='cursor-pointer' disabled={isSubmitting}>Create</Button>
                         </DialogFooter>
                     </form>
                 </Form>

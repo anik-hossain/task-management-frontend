@@ -1,22 +1,30 @@
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../store';
 import TaskCard from '@components/TaskCard';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CreateTask from '@/components/CreateTask';
+import { fetchTasks } from '@/store/slices/taskSlice';
 
 const Dashboard: React.FC = () => {
+
+  const dispatch = useDispatch<AppDispatch>();
+
   const tasks = useSelector((state: RootState) => state.tasks.tasks);
   const [isOpen, setIsOpen] = useState(false);
 
   const handleUpdateTask = (taskId: string, updates: Partial<{
     title: string;
-    description: string;
+    description: string | null;
     priority: string;
     status: string;
   }>) => {
     console.log(taskId, updates);
   };
+
+  useEffect(() => {
+    dispatch(fetchTasks());
+  }, [dispatch]);
 
   return (
     <div className="container mx-auto p-4">

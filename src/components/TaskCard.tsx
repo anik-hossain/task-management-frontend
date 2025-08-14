@@ -5,13 +5,13 @@ import { Button } from './ui/button';
 interface Task {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   priority: string;
   status: string;
-  assignee: string;
-  startDate: string;
-  endDate: string;
-  dependencies?: string[];
+  assignee: number[];
+  start_date: string;
+  end_date: string;
+  dependencies?: string;
 }
 
 interface TaskCardProps {
@@ -51,7 +51,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, usersOnline }) => {
             placeholder="Task Title"
           />
           <textarea
-            value={editedTask.description}
+            value={editedTask.description ?? ''}
             onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
             className="w-full p-2 border rounded"
             placeholder="Task Description"
@@ -111,20 +111,20 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, usersOnline }) => {
             </p>
             <p className="text-sm">
               <span className="font-medium">Status:</span>{' '}
-              {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+              {/* {task.status.charAt(0).toUpperCase() + task.status.slice(1)} */}
             </p>
             <p className="text-sm">
               <span className="font-medium">Assignee:</span> {task.assignee}
             </p>
             <p className="text-sm">
-              <span className="font-medium">Start:</span> {new Date(task.startDate).toLocaleDateString()}
+              <span className="font-medium">Start:</span> {new Date(task.start_date).toLocaleDateString()}
             </p>
             <p className="text-sm">
-              <span className="font-medium">End:</span> {new Date(task.endDate).toLocaleDateString()}
+              <span className="font-medium">End:</span> {new Date(task.end_date).toLocaleDateString()}
             </p>
             {task.dependencies && task.dependencies.length > 0 && (
               <p className="text-sm">
-                <span className="font-medium">Dependencies:</span> {task.dependencies.join(', ')}
+                <span className="font-medium">Dependencies:</span> {task.dependencies}
               </p>
             )}
             <p className="text-sm">
