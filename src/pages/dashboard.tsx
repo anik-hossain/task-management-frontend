@@ -5,12 +5,13 @@ import { useEffect, useState } from 'react';
 import CreateTask from '@/components/CreateTask';
 import { fetchTasks } from '@/store/slices/taskSlice';
 import TaskCard2 from '@/components/TaskCard2';
+import TaskCardSkeleton from '@/components/skeletons/TaskCard';
 
 const Dashboard: React.FC = () => {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const tasks = useSelector((state: RootState) => state.tasks.tasks);
+  const { tasks, status } = useSelector((state: RootState) => state.tasks);
   const [isOpen, setIsOpen] = useState(false);
 
   const handleUpdateTask = (taskId: string, updates: Partial<{
@@ -23,7 +24,7 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchTasks());
+    dispatch(fetchTasks({force: false}));
   }, [dispatch]);
 
   return (
@@ -33,9 +34,14 @@ const Dashboard: React.FC = () => {
         <p className="text-sm text-gray-600">
           Users online: 3
         </p>
-        <Button type="submit" className="cursor-pointer" onClick={()=>setIsOpen(true)}>Add Task</Button>
+        <Button type="submit" className="cursor-pointer" onClick={() => setIsOpen(true)}>Add Task</Button>
       </div>
       <div className="grid grid-cols-1 gap-4">
+        {status === "loading" && (
+          Array.from({ length: 3 }).map((_, index) => (
+            <TaskCardSkeleton key={index} />
+          ))
+        )}
         {tasks.map((task) => (
           <TaskCard2
             key={task.id}

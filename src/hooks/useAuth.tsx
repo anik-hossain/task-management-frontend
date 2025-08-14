@@ -15,6 +15,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
 }
@@ -32,6 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate()
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const login = async (email: string, password: string) => {
      try {
@@ -61,9 +63,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   useEffect(() => {
-    // Check for existing auth token on mount (e.g., from localStorage or backend)
     const checkAuth = async () => {
       try {
+        setIsLoading(true);
         const token = localStorage.getItem('token');
         if (token) {
           const response = await apiService.get('/auth/me') as User
@@ -74,6 +76,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Auth check failed:', error);
         setUser(null);
         setIsAuthenticated(false);
+      } finally{
+        setIsLoading(false);
       }
     };
     checkAuth();
@@ -81,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login, register, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

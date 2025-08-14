@@ -63,7 +63,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
 
     const FormSchema = z.object({
         title: z.string({ error: "Title is required" }),
-        assignee: z.array(z.any()).nonempty({ message: "At least one assignee is required" }),
+        assignees: z.array(z.any()).nonempty({ message: "At least one assignee is required" }),
         description: z.string().optional(),
         priority: z.string().optional(),
         startDate: z.string({ error: "Start date is required" }),
@@ -96,7 +96,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
         resolver: zodResolver(FormSchema),
         defaultValues: {
             title: undefined,
-            assignee: [],
+            assignees: [],
             description: undefined,
             priority: 'low',
             endDate: undefined,
@@ -113,14 +113,14 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                 description: data.description,
                 priority: data.priority,
                 status: 'pending',
-                assignee: data.assignee,
+                assignees: data.assignees,
                 start_date: data.startDate,
                 end_date: data.endDate,
             }));
 
             if (createTask.fulfilled.match(resultAction)) {
                 setIsOpen(false);
-                dispatch(fetchTasks());
+                dispatch(fetchTasks({force: true}));
             } else {
                 console.error('Task creation failed:', resultAction.payload);
             }
@@ -171,7 +171,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                             />
                             <FormField
                                 control={form.control}
-                                name="assignee"
+                                name="assignees"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Assignees</FormLabel>

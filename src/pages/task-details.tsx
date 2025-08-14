@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import apiService from "@/utils/api";
 import { format } from "date-fns";
 import getBadgeColor from "@/utils/getStatusBadgeClass";
+import TaskDetailsSkeleton from "@/components/skeletons/TaskDetailsSkeleton";
 
 const TaskDetails: React.FC = () => {
   const navigate = useNavigate();
@@ -30,11 +31,7 @@ const TaskDetails: React.FC = () => {
   }, [taskId]);
 
   if (!task) {
-    return (
-      <div className="p-6 text-center text-gray-500">
-        Task not found
-      </div>
-    );
+    return <TaskDetailsSkeleton />;
   }
 
   return (

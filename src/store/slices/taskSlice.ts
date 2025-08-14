@@ -14,14 +14,30 @@ const initialState: TaskState = {
 };
 
 // Async thunk to fetch tasks from API
-export const fetchTasks = createAsyncThunk<Task[]>(
+export const fetchTasks = createAsyncThunk<
+  Task[],
+  { force?: boolean },
+  { state: { tasks: TaskState } }
+>(
   'tasks/fetchTasks',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await apiService.get('/tasks')
+      const res = await apiService.get('/tasks');
       return res as Task[];
     } catch (error: any) {
       return rejectWithValue(error.message || 'Error fetching tasks');
+    }
+  },
+  {
+    condition: (payload, { getState }) => {
+      const { force } = payload || {};
+      if (force) return true;
+
+      const { tasks, status } = getState().tasks;
+      if (status === 'loading' || (status === 'succeeded' && tasks.length > 0)) {
+        return false;
+      }
+      return true;
     }
   }
 );

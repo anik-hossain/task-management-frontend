@@ -18,14 +18,16 @@ const RoleBasedRoute: React.FC<{
   element: JSX.Element;
   allowedRoles: string[];
 }> = ({ element, allowedRoles }) => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
-  console.log('user in role based route:', user);
-  
+  if (isLoading) {
+    return <div className="text-center h-[90vh] w-screen flex justify-center items-center">Loading...</div>;
+  }
 
   if (!user || !allowedRoles.includes(user.role)) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
+
   return element;
 };
 
