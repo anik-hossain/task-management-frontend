@@ -1,13 +1,19 @@
 import apiService from '@/utils/api';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
+type Assignee = {
+    id: number;
+    name: string;
+}
+
+
 interface Task {
   id: string;
   title: string;
   description: string | null;
   priority: string;
   status: string;
-  assignee: number[];
+  assignees: Assignee[];
   start_date: string;
   end_date: string;
   dependencies: string;

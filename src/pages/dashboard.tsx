@@ -1,10 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
-import TaskCard from '@components/TaskCard';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import CreateTask from '@/components/CreateTask';
 import { fetchTasks } from '@/store/slices/taskSlice';
+import TaskCard2 from '@/components/TaskCard2';
 
 const Dashboard: React.FC = () => {
 
@@ -35,9 +35,9 @@ const Dashboard: React.FC = () => {
         </p>
         <Button type="submit" className="cursor-pointer" onClick={()=>setIsOpen(true)}>Add Task</Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {tasks.map((task) => (
-          <TaskCard
+          <TaskCard2
             key={task.id}
             task={task}
             onUpdate={handleUpdateTask}
