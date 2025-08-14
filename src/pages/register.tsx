@@ -46,7 +46,7 @@ export default function InputForm() {
     }
 
     return (
-        <div className="mt-8 flex-col items-center justify-center h-screen lg:flex">
+        <div className="mt-8 flex-col items-center justify-center lg:flex">
             <Card className="w-11/12 mx-auto lg:w-1/3">
                 <CardHeader>
                     <CardTitle>Register</CardTitle>
