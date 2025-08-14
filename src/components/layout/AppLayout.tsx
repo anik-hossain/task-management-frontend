@@ -21,6 +21,7 @@ function AppLayout({ children }: AppLayoutProps) {
           <>
             <Link to="/" className="hover:text-gray-300">Home</Link>
             <Link to="/dashboard" className="hover:text-gray-300">Dashboard</Link>
+            <Link to="/project-timeline" className="hover:text-gray-300">Project Timeline</Link>
             <button
               onClick={handleLogout}
               className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"

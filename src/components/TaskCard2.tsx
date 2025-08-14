@@ -11,6 +11,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreVertical } from "lucide-react";
+import getBadgeColor from "@/utils/getStatusBadgeClass";
+import { Link } from "react-router-dom";
 
 type Assignee = {
     id: number;
@@ -53,7 +55,9 @@ const TaskCard2: FC<TaskCardProps> = ({ task, onUpdate, usersOnline }) => {
                 <p className={`text-xs px-2.5 font-medium rounded-full h-fit py-1 ${priorityColors[task.priority] || 'bg-gray-300 text-gray-800'}`}>
                     {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
                 </p>
-                <p className="text-xs text-white bg-pink-300 px-2.5 h-fit font-medium rounded-full py-1">In Progress</p>
+                <p className={`text-xs text-white bg-pink-300 px-2.5 h-fit font-medium rounded-full py-1 capitalize ${getBadgeColor(task.status)}`}>
+                    {task.status.replace('_', ' ').toUpperCase()}
+                </p>
                 <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale">
                     {task.assignees.map((user, index) => (
                         <Avatar key={index} className="w-6 h-6 border border-gray-300">
@@ -71,7 +75,9 @@ const TaskCard2: FC<TaskCardProps> = ({ task, onUpdate, usersOnline }) => {
                         </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem>View</DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link to={`/tasks/${task.id}`}>View</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem>Edit</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(response.user);
             setIsAuthenticated(true);
             
-            navigate('/')
+            navigate('/dashboard')
             toast("Logged in successfully.", { style: { background: '#4caf50', color: '#fff' } })
         } catch (error) {
             toast("Invalid credentials.", { style: { background: '#f44336', color: '#fff' } })
