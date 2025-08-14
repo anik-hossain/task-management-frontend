@@ -5,7 +5,7 @@ import { toast } from "sonner"
 
 // Define User interface
 interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
   role: 'admin' | 'manager' | 'user';
