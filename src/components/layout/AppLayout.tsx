@@ -1,14 +1,12 @@
+// AppLayout.tsx
 import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner"
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "@/store";
-import { fetchTasks } from "@/store/slices/taskSlice";
 import { io } from "socket.io-client";
 import Notifications from "../Notifications";
-import { addNotification } from "@/store/slices/notificationSlice";
+import { useCreateNotificationMutation } from "@/store/services/notificationApi";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -16,67 +14,56 @@ interface AppLayoutProps {
 
 function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated, user } = useAuth();
-  const dispatch = useDispatch<AppDispatch>();
-  const { tasks } = useSelector((state: RootState) => state.tasks);
+  const [createNotification] = useCreateNotificationMutation();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.reload();
   };
 
-  // Fetch tasks to create notifications (example: tasks assigned to the user)
-  useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchTasks({ force: false }));
-    }
-  }, [dispatch, isAuthenticated]);
-
   useEffect(() => {
     if (!user) return;
 
-    const socket = io('http://localhost:3000', {
+    const socket = io("http://localhost:3000", {
       query: { userId: user.id },
     });
 
-
-    socket.on('taskCreated', (task) => {
-
+    // Task created
+    socket.on("taskCreated", async (task) => {
       toast("New Task Assigned", {
         description: `You have been assigned a new task: ${task.title}`,
-      })
+      });
 
-      dispatch(
-        addNotification({
-          id: task.id,
-          title: 'New Task Assigned',
-          message: `You have been assigned a new task: ${task.title}`,
-          is_read: false,
-          createdAt: new Date().toISOString(),
-          taskId: task.id,
-        })
-      );
+      await createNotification({
+        id: task.id,
+        title: "New Task Assigned",
+        message: `You have been assigned a new task: ${task.title}`,
+        is_read: false,
+        createdAt: new Date().toISOString(),
+        taskId: task.id,
+      });
     });
 
-    socket.on('taskUpdated', (task) => {
+    // Task updated
+    socket.on("taskUpdated", async (task) => {
       toast("Task status updated", {
         description: `The status of task "${task.title}" has been updated to "${task.status}"`,
-      })
-      dispatch(
-        addNotification({
-          id: task.id + '_update',
-          title: 'Task status updated',
-          message: `The status of task "${task.title}" has been updated to "${task.status}".`,
-          is_read: false,
-          createdAt: new Date().toISOString(),
-          taskId: task.id,
-        })
-      );
+      });
+
+      await createNotification({
+        id: task.id + "_update",
+        title: "Task status updated",
+        message: `The status of task "${task.title}" has been updated to "${task.status}".`,
+        is_read: false,
+        createdAt: new Date().toISOString(),
+        taskId: task.id,
+      });
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [user, dispatch]);
+  }, [user, createNotification]);
 
   return (
     <div className="app-layout min-h-screen flex flex-col">
