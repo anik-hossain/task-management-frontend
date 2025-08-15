@@ -1,136 +1,79 @@
-import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { Button } from './ui/button';
-import { Task } from '@/types/global';
+import { FC } from "react";
+import { differenceInDays, parseISO } from 'date-fns';
+import {
+  Avatar,
+  AvatarFallback,
+} from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { MoreVertical } from "lucide-react";
+import getBadgeColor from "@/utils/getStatusBadgeClass";
+import { Link } from "react-router-dom";
+import {Task } from "@/types/global";
 
 interface TaskCardProps {
   task: Task;
-  onUpdate: (taskId: string, updates: Partial<Task>) => void;
-  usersOnline: string[];
+  role: string | undefined;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, usersOnline }) => {
-  const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTask, setEditedTask] = useState(task);
-
-  const canEdit = user && ['admin', 'manager', task.assignee].includes(user.role);
-
-  const handleUpdate = () => {
-    if (canEdit) {
-      onUpdate(task.id, {
-        title: editedTask.title,
-        description: editedTask.description,
-        priority: editedTask.priority,
-        status: editedTask.status,
-      });
-      setIsEditing(false);
-    }
+const TaskCard: FC<TaskCardProps> = ({ task, role }) => {
+  const priorityColors: Record<string, string> = {
+    low: "bg-green-300 text-green-800",
+    medium: "bg-yellow-300 text-yellow-800",
+    high: "bg-red-300 text-red-800",
   };
 
+  // Check if current user can edit
+  const canEdit =
+    role === "admin" ||
+    role === "manager"
+
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-      {isEditing && canEdit ? (
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={editedTask.title}
-            onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value })}
-            className="w-full p-2 border rounded"
-            placeholder="Task Title"
-          />
-          <textarea
-            value={editedTask.description ?? ''}
-            onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
-            className="w-full p-2 border rounded"
-            placeholder="Task Description"
-          />
-          <select
-            value={editedTask.priority}
-            onChange={(e) => setEditedTask({ ...editedTask, priority: e.target.value })}
-            className="w-full p-2 border rounded"
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-          <select
-            value={editedTask.status}
-            onChange={(e) => setEditedTask({ ...editedTask, status: e.target.value })}
-            className="w-full p-2 border rounded"
-          >
-            <option value="todo">To Do</option>
-            <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-          <div className="flex justify-end space-x-2 mt-4">
-            <Button
-              onClick={() => setIsEditing(false)}
-              variant="outline"
-              className="cursor-pointer"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleUpdate}
-              className="cursor-pointer"
-            >
-              Save
-            </Button>
-          </div>
+    <div className="bg-white shadow rounded-lg p-4 hover:shadow-md transition-shadow duration-200 flex justify-between items-center">
+      <div>
+        <h2 className="text-lg font-semibold">{task.title}</h2>
+        <p className="text-sm text-gray-600">{task.description}</p>
+      </div>
+      <div className="mt-4 flex gap-2 h-fit">
+        <p
+          className={`text-xs px-2.5 font-medium rounded-full h-fit py-1 ${priorityColors[task.priority] || "bg-gray-300 text-gray-800"
+            }`}
+        >
+          {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
+        </p>
+        <p
+          className={`text-xs text-white bg-pink-300 px-2.5 h-fit font-medium rounded-full py-1 capitalize ${getBadgeColor(task.status)
+            }`}
+        >
+          {task.status.replace("_", " ").toUpperCase()}
+        </p>
+        <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale">
+
+          <Avatar className="w-6 h-6 border border-gray-300">
+            <AvatarFallback className="text-[10px]">{task.assignee.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
         </div>
-      ) : (
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800">{task.title}</h3>
-          <p className="text-gray-600 mt-1">{task.description}</p>
-          <div className="mt-2 space-y-1">
-            <p className="text-sm">
-              <span className="font-medium">Priority:</span>{' '}
-              <span
-                className={
-                  task.priority === 'high'
-                    ? 'text-red-500'
-                    : task.priority === 'medium'
-                    ? 'text-yellow-500'
-                    : 'text-green-500'
-                }
-              >
-                {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-              </span>
-            </p>
-            <p className="text-sm">
-              <span className="font-medium">Status:</span>{' '}
-              {/* {task.status.charAt(0).toUpperCase() + task.status.slice(1)} */}
-            </p>
-            <p className="text-sm">
-              <span className="font-medium">Assignee:</span> {task.assignee.name}
-            </p>
-            <p className="text-sm">
-              <span className="font-medium">Start:</span> {new Date(task.starDate).toLocaleDateString()}
-            </p>
-            <p className="text-sm">
-              <span className="font-medium">End:</span> {new Date(task.dueDate).toLocaleDateString()}
-            </p>
-            {task.dependencies && task.dependencies.length > 0 && (
-              <p className="text-sm">
-                <span className="font-medium">Dependencies:</span> {task.dependencies}
-              </p>
-            )}
-            <p className="text-sm">
-              <span className="font-medium">Users Viewing:</span>{' '}
-              {usersOnline.includes(task.id) ? 'Multiple users' : 'None'}
-            </p>
-          </div>
-          {canEdit && (
-            <Button
-              onClick={() => setIsEditing(true)}
-              className="cursor-pointer mt-4"
-            >
-              Edit Task
-            </Button>
-          )}
-        </div>
-      )}
+        <p className="text-xs text-gray-500 font-medium h-fit mt-0.5">
+          {Math.max(differenceInDays(parseISO(task.dueDate), new Date()), 0)} Days Left
+        </p>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-2 rounded-full hover:bg-gray-100">
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem asChild>
+              <Link to={`/tasks/${task.id}`}>View</Link>
+            </DropdownMenuItem>
+            {canEdit && <DropdownMenuItem>Edit</DropdownMenuItem>} {/* ✅ only show if allowed */}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 };

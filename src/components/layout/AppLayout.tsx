@@ -89,14 +89,6 @@ function AppLayout({ children }: AppLayoutProps) {
                 >
                   Dashboard
                 </Link>
-                {(user?.role === "admin" || user?.role === "manager") && (
-                  <Link
-                    to="/project-timeline"
-                    className="px-3 py-2 rounded-md text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition"
-                  >
-                    Project Timeline
-                  </Link>
-                )}
 
                 {/* Notification Dropdown */}
                 <Notifications />

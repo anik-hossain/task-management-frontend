@@ -81,7 +81,7 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/project-timeline"
+        path="/project-timeline/:projectId"
         element={
           <RoleBasedRoute
             element={<ProjectTimeline />}

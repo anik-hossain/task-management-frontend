@@ -27,7 +27,7 @@ interface Task {
   priority: string;
   status: string;
   assignee: Assignee;
-  starDate: string;
+  startDate: string;
   dueDate: string;
-  dependencies: string[] | string;
+  dependencies: string[];
 }
