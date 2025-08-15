@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import taskReducer from './slices/taskSlice';
+import notificationReducer from './slices/notificationSlice';
 
 export const store = configureStore({
   reducer: {
     tasks: taskReducer,
+    notifications: notificationReducer,
   },
 });
 

@@ -1,17 +1,14 @@
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner"
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { Bell } from "lucide-react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store";
 import { fetchTasks } from "@/store/slices/taskSlice";
+import { io } from "socket.io-client";
+import Notifications from "../Notifications";
+import { addNotification } from "@/store/slices/notificationSlice";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -21,7 +18,6 @@ function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated, user } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
   const { tasks } = useSelector((state: RootState) => state.tasks);
-  const [notifications, setNotifications] = useState<{ id: string; message: string }[]>([]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -35,22 +31,52 @@ function AppLayout({ children }: AppLayoutProps) {
     }
   }, [dispatch, isAuthenticated]);
 
-  // Simple notification logic: show tasks assigned to the user and not completed
   useEffect(() => {
-    if (user) {
-      const userNotifications = tasks
-        .filter(
-          (task) =>
-            task.assignees.some((assignee) => assignee.id === user.id) &&
-            task.status !== "completed"
-        )
-        .map((task) => ({
+    if (!user) return;
+
+    const socket = io('http://localhost:3000', {
+      query: { userId: user.id },
+    });
+
+
+    socket.on('taskCreated', (task) => {
+
+      toast("New Task Assigned", {
+        description: `You have been assigned a new task: ${task.title}`,
+      })
+
+      dispatch(
+        addNotification({
           id: task.id,
-          message: `Task "${task.title}" is ${task.status}`,
-        }));
-      setNotifications(userNotifications);
-    }
-  }, [tasks, user]);
+          title: 'New Task Assigned',
+          message: `You have been assigned a new task: ${task.title}`,
+          is_read: false,
+          createdAt: new Date().toISOString(),
+          taskId: task.id,
+        })
+      );
+    });
+
+    socket.on('taskUpdated', (task) => {
+      toast("Task status updated", {
+        description: `The status of task "${task.title}" has been updated to "${task.status}"`,
+      })
+      dispatch(
+        addNotification({
+          id: task.id + '_update',
+          title: 'Task status updated',
+          message: `The status of task "${task.title}" has been updated to "${task.status}".`,
+          is_read: false,
+          createdAt: new Date().toISOString(),
+          taskId: task.id,
+        })
+      );
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user, dispatch]);
 
   return (
     <div className="app-layout min-h-screen flex flex-col">
@@ -86,25 +112,7 @@ function AppLayout({ children }: AppLayoutProps) {
                 )}
 
                 {/* Notification Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="relative p-2 rounded-full hover:bg-gray-100">
-                      <Bell className="w-5 h-5 text-gray-700" />
-                      {notifications.length > 0 && (
-                        <span className="absolute top-0 right-0 inline-flex h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-                      )}
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64">
-                    {notifications.length === 0 ? (
-                      <DropdownMenuItem>No new notifications</DropdownMenuItem>
-                    ) : (
-                      notifications.map((n) => (
-                        <DropdownMenuItem key={n.id}>{n.message}</DropdownMenuItem>
-                      ))
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Notifications />
 
                 <button
                   onClick={handleLogout}
