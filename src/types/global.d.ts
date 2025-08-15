@@ -5,6 +5,7 @@ export interface Project {
   startDate: string;
   endDate: string;
   status: 'pending' | 'in-progress' | 'completed';
+  tasks?: Task[];
 }
 
 type Assignee = {
@@ -21,7 +22,6 @@ type Project = {
 
 interface Task {
   id: string;
-  project: Project
   title: string;
   description: string | null;
   priority: string;

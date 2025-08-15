@@ -13,7 +13,7 @@ import {
 import { MoreVertical } from "lucide-react";
 import getBadgeColor from "@/utils/getStatusBadgeClass";
 import { Link } from "react-router-dom";
-import { Task } from "@/types/global";
+import {Task } from "@/types/global";
 
 interface TaskCardProps {
   task: Task;

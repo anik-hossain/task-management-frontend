@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{tasks[0]?.project?.name}</h1>
+      <h1 className="text-2xl font-bold mb-4">{tasks.name}</h1>
       <div className="mb-4 flex justify-end items-center">
         <Button type="submit" className="cursor-pointer" onClick={() => setIsOpen(true)}>
           Add Task
@@ -27,7 +27,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 gap-4">
         {isLoading && Array.from({ length: 3 }).map((_, index) => <TaskCardSkeleton key={index} />)}
 
-        {tasks?.map((task: Task) => (
+        {tasks.tasks?.map((task: Task) => (
           <TaskCard2
             key={task.id}
             task={task}

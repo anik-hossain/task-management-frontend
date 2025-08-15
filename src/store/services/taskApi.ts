@@ -1,4 +1,4 @@
-import { Task } from '@/types/global';
+import { Task, Project } from '@/types/global';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const taskApi = createApi({
