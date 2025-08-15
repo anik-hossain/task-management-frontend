@@ -1,17 +1,5 @@
+import { Task } from '@/types/global';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
-// Task interface
-export interface Task {
-  id: string | number;
-  title: string;
-  description?: string | null;
-  priority?: string;
-  status: string;
-  assignees?: { id: string; name: string }[];
-  start_date?: string;
-  end_date?: string;
-  dependencies?: string[];
-}
 
 export const taskApi = createApi({
   reducerPath: 'taskApi',
@@ -36,9 +24,9 @@ export const taskApi = createApi({
       query: (id) => `/tasks/${id}`,
       providesTags: ['Tasks'],
     }),
-    createTask: builder.mutation<Task, Partial<Task>>({
-      query: (body) => ({
-        url: '/tasks',
+    createTask: builder.mutation({
+      query: ({id, body}) => ({
+        url: `/tasks/${id}`,
         method: 'POST',
         body,
       }),

@@ -7,14 +7,27 @@ export interface Project {
   status: 'pending' | 'in-progress' | 'completed';
 }
 
+type Assignee = {
+  id: number
+  name: string;
+  email: string
+  role: string
+}
+
+type Project = {
+  id: number;
+  name: string
+}
+
 interface Task {
   id: string;
+  project: Project
   title: string;
   description: string | null;
   priority: string;
   status: string;
-  assignees: any[];
-  start_date: string;
-  end_date: string;
+  assignee: Assignee;
+  starDate: string;
+  dueDate: string;
   dependencies: string[] | string;
 }

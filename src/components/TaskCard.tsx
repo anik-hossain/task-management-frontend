@@ -1,18 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from './ui/button';
-
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  priority: string;
-  status: string;
-  assignee: number[];
-  start_date: string;
-  end_date: string;
-  dependencies?: string;
-}
+import { Task } from '@/types/global';
 
 interface TaskCardProps {
   task: Task;
@@ -114,13 +103,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, usersOnline }) => {
               {/* {task.status.charAt(0).toUpperCase() + task.status.slice(1)} */}
             </p>
             <p className="text-sm">
-              <span className="font-medium">Assignee:</span> {task.assignee}
+              <span className="font-medium">Assignee:</span> {task.assignee.name}
             </p>
             <p className="text-sm">
-              <span className="font-medium">Start:</span> {new Date(task.start_date).toLocaleDateString()}
+              <span className="font-medium">Start:</span> {new Date(task.starDate).toLocaleDateString()}
             </p>
             <p className="text-sm">
-              <span className="font-medium">End:</span> {new Date(task.end_date).toLocaleDateString()}
+              <span className="font-medium">End:</span> {new Date(task.dueDate).toLocaleDateString()}
             </p>
             {task.dependencies && task.dependencies.length > 0 && (
               <p className="text-sm">

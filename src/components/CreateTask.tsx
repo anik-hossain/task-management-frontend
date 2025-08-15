@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/popover";
 import apiService from '@/utils/api';
 import { useCreateTaskMutation, useGetTasksQuery } from '@/store/services/taskApi';
+import { useParams } from 'react-router-dom';
 
 interface Props {
     isOpen: boolean;
@@ -52,6 +53,7 @@ type Assignee = {
 }
 
 const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
+    const { projectId } = useParams<{ projectId: string }>();
     const [openCal1, setOpenCal1] = useState(false);
     const [openCal2, setOpenCal2] = useState(false);
     const [assignees, setAssignees] = useState<Assignee[]>([]);
@@ -62,7 +64,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
 
     const FormSchema = z.object({
         title: z.string({ error: "Title is required" }),
-        assignees: z.array(z.string()).nonempty({ message: "At least one assignee is required" }),
+        assignee: z.string().nonempty({ message: "Assignee is required" }), // single value now
         description: z.string().optional(),
         priority: z.string().optional(),
         startDate: z.string({ error: "Start date is required" }),
@@ -75,14 +77,13 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
         { id: "2", label: "Setup Database" },
         { id: "3", label: "API Integration" },
     ] as const;
-
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             title: "",
-            assignees: [],
+            assignee: "", // single value
             description: "",
-            priority: 'low',
+            priority: "low",
             startDate: "",
             endDate: "",
             dependencies: [],
@@ -92,16 +93,18 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
             setIsSubmitting(true);
-            await createTask({
+            console.log(data);
+
+            await createTask({id: projectId, body: {
                 title: data.title,
                 description: data.description,
                 priority: data.priority,
                 status: 'pending',
-                assignees: data.assignees,
-                start_date: data.startDate,
-                end_date: data.endDate,
-                dependencies: data.dependencies,
-            }).unwrap();
+                assigneeId: Number(data.assignee),
+                startDate: new Date(data.startDate),
+                dueDate: new Date(data.endDate),
+                dependencies: data.dependencies?.map(item => Number(item)),
+            }}).unwrap();
             setIsOpen(false);
             refetchTasks();
         } catch (error) {
@@ -133,7 +136,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                             <DialogDescription>Fill in details below.</DialogDescription>
                         </DialogHeader>
 
-                        {/* Title & Assignees */}
+                        {/* Title & Assignee */}
                         <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
                             <FormField control={form.control} name="title" render={({ field }) => (
                                 <FormItem>
@@ -144,52 +147,32 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                                     <FormMessage />
                                 </FormItem>
                             )} />
-                            <FormField control={form.control} name="assignees" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Assignees</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="outline" className="w-full justify-between">
-                                                {field.value.length > 0 ? `${field.value.length} selected` : "Select assignees"}
+                            <FormField
+                                control={form.control}
+                                name="assignee"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Assignee</FormLabel>
+                                        <Select value={field.value} onValueChange={field.onChange}>
+                                            <SelectTrigger className="w-full justify-between">
+                                                {field.value
+                                                    ? assignees.find(person => person.id == field.value)?.name || "Unknown"
+                                                    : "Select assignee"}
                                                 <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[300px] p-0">
-                                            <div className="max-h-[200px] overflow-y-auto">
-                                                {assignees.map(person => {
-                                                    const isSelected = field.value.includes(person.id);
-                                                    return (
-                                                        <div
-                                                            key={person.id}
-                                                            className="flex cursor-pointer items-center space-x-2 px-3 py-2 hover:bg-accent"
-                                                            onClick={() => {
-                                                                if (isSelected) {
-                                                                    field.onChange(field.value.filter(id => id !== person.id));
-                                                                } else {
-                                                                    field.onChange([...field.value, person.id]);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Checkbox
-                                                                checked={isSelected}
-                                                                onCheckedChange={(checked) => {
-                                                                    if (checked) {
-                                                                        field.onChange([...field.value, person.id]);
-                                                                    } else {
-                                                                        field.onChange(field.value.filter(id => id !== person.id));
-                                                                    }
-                                                                }}
-                                                            />
-                                                            <span className="text-sm">{person.name}</span>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {assignees.map(person => (
+                                                    <SelectItem key={person.id} value={person.id}>
+                                                        {person.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
                         </div>
 
                         {/* Description & Priority */}
