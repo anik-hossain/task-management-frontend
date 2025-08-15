@@ -16,8 +16,8 @@ export const taskApi = createApi({
   }),
   tagTypes: ['Tasks'],
   endpoints: (builder) => ({
-    getTasks: builder.query<Task[], void>({
-      query: () => '/tasks',
+    getTasks: builder.query({
+      query: (id: string) => `/tasks/${id}`,
       providesTags: ['Tasks'],
     }),
     getTaskById: builder.query<Task, string | number>({

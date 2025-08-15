@@ -3,7 +3,6 @@ import ProjectModal from '@/components/projects/ProjectModal';
 import ProjectCardSkeleton from '@/components/skeletons/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { useGetProjectsQuery } from '@/store/services/projectApi';
-import { Project } from '@/types/global';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,7 +23,6 @@ export const ProjectsPage: React.FC = () => {
 
   return (
     <div className="p-6">
-        {JSON.stringify(projects, null, 2)}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Projects</h1>
         <Button onClick={handleAdd}>New Project</Button>

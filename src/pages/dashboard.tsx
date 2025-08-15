@@ -1,21 +1,19 @@
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import CreateTask from '@/components/CreateTask';
 import TaskCard2 from '@/components/TaskCard2';
 import TaskCardSkeleton from '@/components/skeletons/TaskCard';
 import { useAuth } from '@/hooks/useAuth';
 import { useGetTasksQuery } from '@/store/services/taskApi';
+import { useParams } from 'react-router-dom';
+import { Task } from '@/types/global';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const { projectId } = useParams<{ projectId: string }>();
 
-  const { data: tasks = [], isLoading } = useGetTasksQuery();
-
-  useEffect(()=>{
-    console.log(tasks);
-    
-  }, [tasks])
+  const { data: tasks = [], isLoading } = useGetTasksQuery(projectId || '', { skip: !projectId })
 
   return (
     <div className="container mx-auto p-4">
@@ -29,7 +27,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 gap-4">
         {isLoading && Array.from({ length: 3 }).map((_, index) => <TaskCardSkeleton key={index} />)}
 
-        {tasks?.map((task) => (
+        {tasks?.map((task: Task) => (
           <TaskCard2
             key={task.id}
             task={task}
