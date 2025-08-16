@@ -35,8 +35,8 @@ export default function InputForm() {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            email: 'anik.wdev@gmail.com',
-            password: '12345678',
+            email: undefined,
+            password: undefined,
         },
     })
 
