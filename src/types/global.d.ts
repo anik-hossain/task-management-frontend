@@ -6,9 +6,10 @@ export interface Project {
   endDate: string;
   status: 'pending' | 'in-progress' | 'completed';
   tasks?: Task[];
+  members: Assignee[]
 }
 
-type Assignee = {
+export type Assignee = {
   id: number
   name: string;
   email: string

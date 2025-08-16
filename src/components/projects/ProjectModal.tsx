@@ -24,7 +24,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import apiService from '@/utils/api';
 import { useAuth } from '@/hooks/useAuth';
-import { useCreateProjectMutation } from '@/store/services/projectApi';
+import { useCreateProjectMutation, useUpdateProjectMutation } from '@/store/services/projectApi';
 import {
     Popover,
     PopoverContent,
@@ -33,19 +33,23 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { ChevronDownIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Assignee, Project } from '@/types/global';
 
 interface Props {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
+    project?: Project | null
+    setProject?: () => void
 }
 
-const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
-    const [assignees, setAssignees] = useState<any[]>([]);
+const CreateTask: FC<Props> = ({ isOpen, setIsOpen, project, setProject }) => {
+    const [assignees, setAssignees] = useState<Assignee[]>([]);
     const [openCal1, setOpenCal1] = useState(false);
     const [openCal2, setOpenCal2] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { user } = useAuth()
     const [createProject] = useCreateProjectMutation();
+    const [updateProject] = useUpdateProjectMutation();
 
     const FormSchema = z.object({
         name: z.string({ error: "Title is required" }),
@@ -69,7 +73,12 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
             setIsSubmitting(true);
-            await createProject({ ownerId: user?.id, ...data }).unwrap();
+            if (project) {
+                await updateProject({ id: project.id, updates: data }).unwrap()
+            } else {
+                await createProject({ ownerId: user?.id, ...data }).unwrap();
+            }
+
         } catch (error) {
             console.error("Error creating project:", error);
         } finally {
@@ -99,9 +108,40 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
         fetchData();
     }, [user?.id]);
 
+    useEffect(() => {
+        if (project) {
+            form.reset({
+                name: project.name || "",
+                description: project.description || "",
+                startDate: project.startDate || "",
+                endDate: project.endDate || "",
+                members: project.members ? project.members.map(m => m.id) : [],
+            });
+        }
+    }, [project, form]);
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                setIsOpen(open);
+
+                if (!open) {
+                    // Reset the form to default values
+                    form.reset({
+                        name: "",
+                        description: "",
+                        startDate: "",
+                        endDate: "",
+                        members: [],
+                    });
+
+                    // Clear project in parent if setter exists
+                    if (setProject) setProject();
+                }
+            }}
+        >
+
             <DialogContent className="sm:max-w-[720px]">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

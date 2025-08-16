@@ -34,7 +34,9 @@ const Dashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 gap-4">
             {isLoading && Array.from({ length: 3 }).map((_, index) => <TaskCardSkeleton key={index} />)}
-
+            {(!project?.tasks?.length && !isLoading) && <p className="px-3 py-2 text-center text-gray-500 mt-20">
+              No Task
+            </p>}
             {project.tasks?.map((task: Task) => (
               <TaskCard
                 key={task.id}
@@ -46,13 +48,13 @@ const Dashboard: React.FC = () => {
           <CreateTask isOpen={isOpen} setIsOpen={setIsOpen} members={project.members} />
         </div>
         <div className='p-4 h-full bg-white w-full col-span-4 min-h-[60vh] border rounded-md'>
-          <h3 className='font-bold text-lg text-gray-800'>{project.name}</h3>
-          <p className='mt-2 text-sm text-gray-500'>{project.description}</p>
+          <h3 className='font-bold text-lg text-gray-800'>{project?.name}</h3>
+          <p className='mt-2 text-sm text-gray-500'>{project?.description}</p>
           <div className='w-1/2 mt-4 space-y-3'>
             <div className='grid grid-cols-2'>
               <b className='font-semibold text-gray-900 text-sm'>Status:</b>
               <p className={`text-gray-600 font-medium capitalize text-sm w-fit px-2 rounded-full ${getBadgeColor(project.status)
-                          }`}>{project.status}</p>
+                }`}>{project?.status}</p>
             </div>
             <div className='grid grid-cols-2'>
               <b className='font-semibold text-gray-900 text-sm'>End Date:</b>
@@ -61,7 +63,7 @@ const Dashboard: React.FC = () => {
             <div className='grid grid-cols-2'>
               <b className='font-semibold text-gray-900 text-sm'>Members:</b>
               <div className='font-medium text-gray-600 text-sm'>
-                {project.members.map((member: any) => <p key={member.id}>{member.name}</p>)}
+                {project?.members?.map((member: any) => <p key={member.id}>{member.name}</p>)}
               </div>
             </div>
           </div>

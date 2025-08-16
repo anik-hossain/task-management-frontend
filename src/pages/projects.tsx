@@ -5,11 +5,11 @@ import ProjectCardSkeleton from '@/components/skeletons/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useGetProjectsQuery } from '@/store/services/projectApi';
-import { useNavigate } from 'react-router-dom';
+import { Project } from '@/types/global';
 
 export const ProjectsPage: FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const navigate = useNavigate();
+  const [project, setProject] = useState<Project | null>(null)
   const { user } = useAuth()
 
   const { data: projects = [], isLoading } = useGetProjectsQuery();
@@ -18,9 +18,11 @@ export const ProjectsPage: FC = () => {
     setModalOpen(true);
   };
 
-  const handleProjectClick = (projectId: number) => {
-    navigate(`/projects/${projectId}`);
-  };
+
+  const handleEdit = (project: Project) =>{
+    setProject(project)
+    setModalOpen(true)
+  }
 
 
   return (
@@ -37,15 +39,16 @@ export const ProjectsPage: FC = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {isLoading && Array.from({ length: 3 }).map((_, index) => <ProjectCardSkeleton key={index} />)}
         {projects?.map((project) => (
-          <div key={project.id} onClick={() => handleProjectClick(project.id)}>
-            <ProjectCard project={project} onEdit={() => { }} />
+          <div key={project.id}>
+            <ProjectCard project={project} onEdit={handleEdit} />
           </div>
         ))}
       </div>
-
       <ProjectModal
         isOpen={modalOpen}
         setIsOpen={() => setModalOpen(false)}
+        project={project}
+        setProject={() => setProject(null)}
       />
     </div>
   );

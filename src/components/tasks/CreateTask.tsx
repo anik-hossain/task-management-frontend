@@ -83,8 +83,8 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen, members }) => {
             assignee: "", // single value
             description: "",
             priority: "low",
-            startDate: "",
-            endDate: "",
+            startDate: undefined,
+            endDate: undefined,
             dependencies: [],
         },
     });
