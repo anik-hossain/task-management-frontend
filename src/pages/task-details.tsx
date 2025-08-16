@@ -12,18 +12,7 @@ import { format } from "date-fns";
 import getBadgeColor from "@/utils/getStatusBadgeClass";
 import TaskDetailsSkeleton from "@/components/skeletons/TaskDetailsSkeleton";
 import { useAuth } from "@/hooks/useAuth";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  priority: string;
-  status: "pending" | "in-progress" | "completed";
-  start_date: string;
-  end_date: string;
-  assignees: { id: string; name: string }[];
-  dependencies?: string[];
-}
+import { Task } from "@/types/global";
 
 const allowedTransitions: Record<string, Record<string, string[]>> = {
   admin: {
@@ -54,7 +43,7 @@ const TaskDetails: React.FC = () => {
   useEffect(() => {
     const fetchTaskDetails = async () => {
       try {
-        const response = (await apiService.get(`/tasks/${taskId}`)) as Task;
+        const response = (await apiService.get(`/tasks/task/${taskId}`)) as Task;
         setTask(response);
       } catch (error) {
         console.error("Failed to fetch task:", error);
@@ -111,12 +100,9 @@ const TaskDetails: React.FC = () => {
           <div className="flex flex-col gap-2 text-sm text-gray-500">
             <span>
               <strong>Assignee: </strong>
-              {task.assignees.map((assignee, index) => (
-                <span key={assignee.id} className="font-medium text-green-500">
-                  {assignee.name}
-                  {index < task.assignees.length - 1 ? ", " : ""}
+              <span className="font-medium text-green-500">
+                  {task.assignee.name}
                 </span>
-              ))}
             </span>
             <span>
               <strong>Status:</strong>{" "}
@@ -130,11 +116,11 @@ const TaskDetails: React.FC = () => {
             </span>
             <span>
               <strong>Start Date:</strong>{" "}
-              {format(new Date(task.start_date), "MMM dd, yyyy")}
+              {format(new Date(task.startDate), "MMM dd, yyyy")}
             </span>
             <span>
               <strong>End Date:</strong>{" "}
-              {format(new Date(task.end_date), "MMM dd, yyyy")}
+              {format(new Date(task.dueDate), "MMM dd, yyyy")}
             </span>
           </div>
 

@@ -60,7 +60,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [createTask] = useCreateTaskMutation();
-    const { refetch: refetchTasks } = useGetTasksQuery();
+    const { refetch: refetchTasks } = useGetTasksQuery(projectId || '', { skip: !projectId });
 
     const FormSchema = z.object({
         title: z.string({ error: "Title is required" }),

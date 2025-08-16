@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import Notifications from "./Notifications";
-import { useCreateNotificationMutation } from "@/store/services/notificationApi";
+import { useGetNotificationsQuery } from "@/store/services/notificationApi";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ interface AppLayoutProps {
 
 function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated, user } = useAuth();
-  const [createNotification] = useCreateNotificationMutation();
+  const { refetch } = useGetNotificationsQuery();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -39,14 +39,7 @@ function AppLayout({ children }: AppLayoutProps) {
         description: `You have been assigned a new task: ${task.title}`,
       });
 
-      await createNotification({
-        id: task.id,
-        title: "New Task Assigned",
-        message: `You have been assigned a new task: ${task.title}`,
-        is_read: false,
-        createdAt: new Date().toISOString(),
-        taskId: task.id,
-      });
+      await refetch()
     });
 
     // Task updated
@@ -55,20 +48,13 @@ function AppLayout({ children }: AppLayoutProps) {
         description: `The status of task "${task.title}" has been updated to "${task.status}"`,
       });
 
-      await createNotification({
-        id: task.id + "_update",
-        title: "Task status updated",
-        message: `The status of task "${task.title}" has been updated to "${task.status}".`,
-        is_read: false,
-        createdAt: new Date().toISOString(),
-        taskId: task.id,
-      });
+      await refetch()
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [user, createNotification]);
+  }, [user]);
 
   return (
     <div className="app-layout min-h-screen flex flex-col">

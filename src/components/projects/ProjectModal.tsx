@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { ChevronDownIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Props {
     isOpen: boolean;
@@ -39,6 +40,7 @@ interface Props {
 }
 
 const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
+    const [assignees, setAssignees] = useState<any[]>([]);
     const [openCal1, setOpenCal1] = useState(false);
     const [openCal2, setOpenCal2] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,6 +52,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
         description: z.string().optional(),
         startDate: z.string({ error: "Start date is required" }),
         endDate: z.string({ error: "End date is required" }),
+        members: z.array(z.any()).nonempty({ message: "At least one assignee is required" }),
     });
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -59,6 +62,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
             description: undefined,
             startDate: "",
             endDate: "",
+            members: [],
         },
     });
 
@@ -66,7 +70,6 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
         try {
             setIsSubmitting(true);
             await createProject({ ownerId: user?.id, ...data }).unwrap();
-            await apiService.post('/projects', { ownerId: user?.id, ...data })
         } catch (error) {
             console.error("Error creating project:", error);
         } finally {
@@ -75,6 +78,27 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
             form.reset();
         }
     }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const fetchAssignees = await apiService.get('/users') as any[];
+                // remove auth user from the list
+                const filtered = fetchAssignees.filter(p => p.id !== user?.id);
+                setAssignees(filtered);
+
+                // ensure form value doesn't include auth user
+                form.setValue(
+                    "members",
+                    form.getValues("members").filter(id => id !== user?.id)
+                );
+            } catch (error) {
+                console.error('Error fetching assignees:', error);
+            }
+        };
+        fetchData();
+    }, [user?.id]);
+
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -157,6 +181,52 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                                 </FormItem>
                             )} />
                         </div>
+                        <FormField control={form.control} name="members" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Assignees</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" className="w-full justify-between">
+                                            {field.value.length > 0 ? `${field.value.length} selected` : "Select assignees"}
+                                            <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[300px] p-0">
+                                        <div className="max-h-[200px] overflow-y-auto">
+                                            {assignees.map(person => {
+                                                const isSelected = field.value.includes(person.id);
+                                                return (
+                                                    <div
+                                                        key={person.id}
+                                                        className="flex cursor-pointer items-center space-x-2 px-3 py-2 hover:bg-accent"
+                                                        onClick={() => {
+                                                            if (isSelected) {
+                                                                field.onChange(field.value.filter(id => id !== person.id));
+                                                            } else {
+                                                                field.onChange([...field.value, person.id]);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Checkbox
+                                                            checked={isSelected}
+                                                            onCheckedChange={(checked) => {
+                                                                if (checked) {
+                                                                    field.onChange([...field.value, person.id]);
+                                                                } else {
+                                                                    field.onChange(field.value.filter(id => id !== person.id));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <span className="text-sm">{person.name}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
                         <DialogFooter>
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>
