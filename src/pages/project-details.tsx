@@ -20,8 +20,8 @@ const Dashboard: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{project.name}</h1>
-      <div className='grid grid-cols-12'>
-        <div className='col-span-8 p-4'>
+      <div className='grid lg:grid-cols-12'>
+        <div className='lg:col-span-8 p-4 order-2 lg:order-1'>
           <div className="mb-4 flex justify-end items-center gap-2">
             {user && ['admin', 'manager'].includes(user?.role) && <Button type="submit" className="cursor-pointer" onClick={() => navigate(`/project-timeline/${projectId}`)}>
               Timeline
@@ -47,10 +47,10 @@ const Dashboard: React.FC = () => {
 
           <CreateTask isOpen={isOpen} setIsOpen={setIsOpen} members={project.members} />
         </div>
-        <div className='p-4 h-full bg-white w-full col-span-4 min-h-[60vh] border rounded-md'>
+        <div className='p-4 h-full bg-white w-full lg:col-span-4 min-h-[60vh] border rounded-md order-1 lg:order-2'>
           <h3 className='font-bold text-lg text-gray-800'>{project?.name}</h3>
           <p className='mt-2 text-sm text-gray-500'>{project?.description}</p>
-          <div className='w-1/2 mt-4 space-y-3'>
+          <div className='lg:w-1/2 mt-4 space-y-3'>
             <div className='grid grid-cols-2'>
               <b className='font-semibold text-gray-900 text-sm'>Status:</b>
               <p className={`text-gray-600 font-medium capitalize text-sm w-fit px-2 rounded-full ${getBadgeColor(project.status)

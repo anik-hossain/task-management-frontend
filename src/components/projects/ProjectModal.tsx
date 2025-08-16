@@ -146,7 +146,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen, project, setProject }) => {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <DialogHeader>
-                            <DialogTitle>Create New Project</DialogTitle>
+                            <DialogTitle>{project ? 'Update Project': 'Create New Project'} </DialogTitle>
                             <DialogDescription>Fill in details below.</DialogDescription>
                         </DialogHeader>
                         <FormField control={form.control} name="name" render={({ field }) => (
@@ -223,11 +223,11 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen, project, setProject }) => {
                         </div>
                         <FormField control={form.control} name="members" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Assignees</FormLabel>
+                                <FormLabel>Members</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <Button variant="outline" className="w-full justify-between">
-                                            {field.value.length > 0 ? `${field.value.length} selected` : "Select assignees"}
+                                            {field.value.length > 0 ? `${field.value.length} selected` : "Select members"}
                                             <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
@@ -271,7 +271,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen, project, setProject }) => {
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>
                             </DialogClose>
-                            <Button type="submit" disabled={isSubmitting}>Create</Button>
+                            <Button type="submit" disabled={isSubmitting}>{project?.id ? 'Save' : 'Create'}</Button>
                         </DialogFooter>
                     </form>
                 </Form>
