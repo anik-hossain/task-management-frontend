@@ -105,6 +105,7 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen, members }) => {
                 dependencies: data.dependencies?.map(item => Number(item)),
             }}).unwrap();
             setIsOpen(false);
+            form.reset()
             refetchTasks();
         } catch (error) {
             console.error("Error creating task:", error);
