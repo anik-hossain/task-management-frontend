@@ -9,7 +9,7 @@ interface Props {
   onEdit: (project: Project) => void;
 }
 
-export const ProjectCard: React.FC<Props> = ({ project, onEdit }) => {
+const ProjectCard: React.FC<Props> = ({ project, onEdit }) => {
   const navigate = useNavigate();
   const [projectDelete] = useDeleteProjectMutation()
 
@@ -41,3 +41,5 @@ export const ProjectCard: React.FC<Props> = ({ project, onEdit }) => {
     </div>
   );
 };
+
+export default ProjectCard;
