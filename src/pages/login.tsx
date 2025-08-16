@@ -75,7 +75,7 @@ export default function InputForm() {
                                     <FormItem>
                                         <FormLabel>Password</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Password" {...field} />
+                                            <Input placeholder="Password" {...field} type="password" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
