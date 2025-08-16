@@ -17,20 +17,14 @@ import {Task } from "@/types/global";
 
 interface TaskCardProps {
   task: Task;
-  role: string | undefined;
 }
 
-const TaskCard: FC<TaskCardProps> = ({ task, role }) => {
+const TaskCard: FC<TaskCardProps> = ({ task }) => {
   const priorityColors: Record<string, string> = {
     low: "bg-green-300 text-green-800",
     medium: "bg-yellow-300 text-yellow-800",
     high: "bg-red-300 text-red-800",
   };
-
-  // Check if current user can edit
-  const canEdit =
-    role === "admin" ||
-    role === "manager"
 
   return (
     <div className="bg-white shadow rounded-lg p-4 hover:shadow-md transition-shadow duration-200 flex justify-between items-center">
@@ -70,7 +64,6 @@ const TaskCard: FC<TaskCardProps> = ({ task, role }) => {
             <DropdownMenuItem asChild>
               <Link to={`/tasks/${task.id}`}>View</Link>
             </DropdownMenuItem>
-            {canEdit && <DropdownMenuItem>Edit</DropdownMenuItem>} {/* ✅ only show if allowed */}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
