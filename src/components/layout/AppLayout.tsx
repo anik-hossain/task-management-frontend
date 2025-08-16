@@ -17,6 +17,8 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
+const SOCKET_URL =  import.meta.env.VITE_SOCKET_URL
+
 function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated, user } = useAuth();
   const { refetch } = useGetNotificationsQuery();
@@ -29,7 +31,7 @@ function AppLayout({ children }: AppLayoutProps) {
   useEffect(() => {
     if (!user) return;
 
-    const socket = io("http://localhost:3000", {
+    const socket = io(SOCKET_URL, {
       query: { userId: user.id },
     });
 
