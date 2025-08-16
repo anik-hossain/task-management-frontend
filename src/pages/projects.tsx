@@ -1,13 +1,13 @@
+import { FC, useState } from 'react';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import ProjectModal from '@/components/projects/ProjectModal';
 import ProjectCardSkeleton from '@/components/skeletons/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useGetProjectsQuery } from '@/store/services/projectApi';
-import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export const ProjectsPage: React.FC = () => {
+export const ProjectsPage: FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth()

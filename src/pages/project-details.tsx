@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import CreateTask from '@/components/CreateTask';
-import TaskCard from '@/components/TaskCard';
+import CreateTask from '@/components/tasks/CreateTask';
+import TaskCard from '@/components/tasks/TaskCard';
 import TaskCardSkeleton from '@/components/skeletons/TaskCard';
 import { useAuth } from '@/hooks/useAuth';
 import { useGetTasksQuery } from '@/store/services/taskApi';
@@ -14,15 +14,16 @@ const Dashboard: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
-  const { data: tasks = [], isLoading } = useGetTasksQuery(projectId || '', { skip: !projectId })
+  const { data: project = {}, isLoading } = useGetTasksQuery(projectId || '', { skip: !projectId })
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{tasks.name}</h1>
+      <h1 className="text-2xl font-bold mb-4">{project.name}</h1>
       <div className="mb-4 flex justify-end items-center gap-2">
-        <Button type="submit" className="cursor-pointer" onClick={() => navigate(`/project-timeline/${projectId}`)}>
+        {user && ['admin', 'manager'].includes(user?.role) && <Button type="submit" className="cursor-pointer" onClick={() => navigate(`/project-timeline/${projectId}`)}>
           Timeline
-        </Button>
+        </Button>}
+
         <Button type="submit" className="cursor-pointer" onClick={() => setIsOpen(true)}>
           Add Task
         </Button>
@@ -31,7 +32,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 gap-4">
         {isLoading && Array.from({ length: 3 }).map((_, index) => <TaskCardSkeleton key={index} />)}
 
-        {tasks.tasks?.map((task: Task) => (
+        {project.tasks?.map((task: Task) => (
           <TaskCard
             key={task.id}
             task={task}
@@ -40,7 +41,7 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      <CreateTask isOpen={isOpen} setIsOpen={setIsOpen} />
+      <CreateTask isOpen={isOpen} setIsOpen={setIsOpen} members={project.members} />
     </div>
   );
 };

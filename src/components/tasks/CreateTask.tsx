@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,8 +21,8 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 import {
     Select,
     SelectContent,
@@ -37,14 +37,8 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import apiService from '@/utils/api';
 import { useCreateTaskMutation, useGetTasksQuery } from '@/store/services/taskApi';
 import { useParams } from 'react-router-dom';
-
-interface Props {
-    isOpen: boolean;
-    setIsOpen: (isOpen: boolean) => void;
-}
 
 type Assignee = {
     id: string;
@@ -52,11 +46,16 @@ type Assignee = {
     email: string;
 }
 
-const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
+interface Props {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    members: Assignee[]
+}
+
+const CreateTask: FC<Props> = ({ isOpen, setIsOpen, members }) => {
     const { projectId } = useParams<{ projectId: string }>();
     const [openCal1, setOpenCal1] = useState(false);
     const [openCal2, setOpenCal2] = useState(false);
-    const [assignees, setAssignees] = useState<Assignee[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [createTask] = useCreateTaskMutation();
@@ -114,17 +113,6 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
         }
     }
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const fetchAssignees = await apiService.get('/users') as Assignee[];
-                setAssignees(fetchAssignees);
-            } catch (error) {
-                console.error('Error fetching assignees:', error);
-            }
-        };
-        fetchData();
-    }, []);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -156,12 +144,12 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen }) => {
                                         <Select value={field.value} onValueChange={field.onChange}>
                                             <SelectTrigger className="w-full justify-between">
                                                 {field.value
-                                                    ? assignees.find(person => person.id == field.value)?.name || "Unknown"
+                                                    ? members.find(person => person.id == field.value)?.name || "Unknown"
                                                     : "Select assignee"}
                                                 <ChevronDownIcon className="ml-2 h-4 w-4 opacity-50" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {assignees.map(person => (
+                                                {members.map(person => (
                                                     <SelectItem key={person.id} value={person.id}>
                                                         {person.name}
                                                     </SelectItem>

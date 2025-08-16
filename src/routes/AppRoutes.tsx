@@ -3,12 +3,12 @@ import Home from '@pages/index'
 import Login from '@pages/login'
 import NotFound from '@pages/not-found'
 import { JSX } from 'react'
-import Dashboard from '@/pages/dashboard'
+import ProjecetDetails from '@/pages/project-details'
 import { useAuth } from '@/hooks/useAuth'
 import Register from '@/pages/register'
 import TaskDetails from '@/pages/task-details'
 import ProjectTimeline from '@/pages/project-timeline'
-import { ProjectsPage } from '@/pages/ProjectsPage'
+import { ProjectsPage } from '@/pages/projects'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -66,7 +66,7 @@ function AppRoutes() {
         path="/projects/:projectId"
         element={
           <RoleBasedRoute
-            element={<Dashboard />}
+            element={<ProjecetDetails />}
             allowedRoles={['admin', 'manager', 'member']}
           />
         }
