@@ -1,11 +1,16 @@
-// AppLayout.tsx
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { io } from "socket.io-client";
-import Notifications from "../Notifications";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import Notifications from "./Notifications";
 import { useCreateNotificationMutation } from "@/store/services/notificationApi";
 
 interface AppLayoutProps {
@@ -70,19 +75,13 @@ function AppLayout({ children }: AppLayoutProps) {
       {/* Header */}
       <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between p-4">
-          <Link to="/" className="text-2xl font-bold text-indigo-600">
-            ProjectManager {user?.name}
+          <Link to="/" className="text-2xl font-bold text-orange-500">
+            Project Manager
           </Link>
 
           <nav className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/"
-                  className="px-3 py-2 rounded-md text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition"
-                >
-                  Home
-                </Link>
                 <Link
                   to="/dashboard"
                   className="px-3 py-2 rounded-md text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition"
@@ -93,12 +92,27 @@ function AppLayout({ children }: AppLayoutProps) {
                 {/* Notification Dropdown */}
                 <Notifications />
 
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition"
-                >
-                  Logout
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="relative p-2 rounded-full hover:bg-gray-100">
+                      {user?.email}
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent className="w-52 mt-4">
+                    <DropdownMenuItem
+                      className={`px-3 py-2 rounded-md flex flex-col items-start w-full`}
+                    >
+                      {user?.name}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={`px-3 py-2 rounded-md flex flex-col items-start w-full`}
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <>

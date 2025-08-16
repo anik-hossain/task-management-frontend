@@ -22,7 +22,7 @@ const RoleBasedRoute: React.FC<{
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div className="text-center h-[90vh] w-screen flex justify-center items-center">Loading...</div>;
+    return <div className="text-center h-[70vh] flex justify-center items-center">Loading...</div>;
   }
 
   if (!user || !allowedRoles.includes(user.role)) {

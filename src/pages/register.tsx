@@ -18,10 +18,9 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import apiService from "@/utils/api"
-import { toast } from "sonner"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
+import { useState } from "react"
 
 const FormSchema = z.object({
     name: z.string({error: "Name is required"}),
@@ -31,6 +30,7 @@ const FormSchema = z.object({
 
 export default function InputForm() {
     const { register } = useAuth()
+    const [isLoading, setIsLoading] = useState(false)
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -42,7 +42,9 @@ export default function InputForm() {
     })
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        register(data.name, data.email, data.password)
+        setIsLoading(true)
+        await register(data.name, data.email, data.password)
+        setIsLoading(false)
     }
 
     return (
@@ -93,7 +95,7 @@ export default function InputForm() {
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="cursor-pointer">Submit</Button>
+                            <Button type="submit" className="cursor-pointer" disabled={isLoading}>Submit</Button>
                             <p>Already have an account? <Link to="/login">Login</Link></p>
                         </form>
                     </Form>
