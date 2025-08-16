@@ -62,10 +62,10 @@ const CreateTask: FC<Props> = ({ isOpen, setIsOpen, project, setProject }) => {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            name: "",
+            name: undefined,
             description: undefined,
-            startDate: "",
-            endDate: "",
+            startDate: undefined,
+            endDate: undefined,
             members: [],
         },
     });

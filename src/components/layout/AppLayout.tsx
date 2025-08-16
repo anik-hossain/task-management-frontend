@@ -12,16 +12,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Notifications from "./Notifications";
 import { useGetNotificationsQuery } from "@/store/services/notificationApi";
+import { useGetProjectsQuery } from "@/store/services/projectApi";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-const SOCKET_URL =  import.meta.env.VITE_SOCKET_URL
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL
 
 function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated, user } = useAuth();
   const { refetch } = useGetNotificationsQuery();
+  const { refetch: reftechProject } = useGetProjectsQuery();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -33,6 +35,15 @@ function AppLayout({ children }: AppLayoutProps) {
 
     const socket = io(SOCKET_URL, {
       query: { userId: user.id },
+    });
+
+    // Project created
+    socket.on("projectCreated", async (project) => {
+      toast("You have been added to project", {
+        description: `You have been assigned a new task: ${project.name}`,
+      });
+      await refetch()
+      await reftechProject()
     });
 
     // Task created
