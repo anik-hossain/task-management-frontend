@@ -3,6 +3,7 @@ import getBadgeColor from '@/utils/getStatusBadgeClass';
 import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useDeleteProjectMutation } from '@/store/services/projectApi';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Props {
   project: Project;
@@ -12,6 +13,7 @@ interface Props {
 const ProjectCard: React.FC<Props> = ({ project, onEdit }) => {
   const navigate = useNavigate();
   const [projectDelete] = useDeleteProjectMutation()
+  const { user } = useAuth()
 
   const handleProjectClick = (projectId: number) => {
     navigate(`/projects/${projectId}`);
@@ -22,7 +24,7 @@ const ProjectCard: React.FC<Props> = ({ project, onEdit }) => {
   }
 
   return (
-    <div className="border rounded-lg p-4 shadow-xs hover:shadow transition cursor-pointer">
+    <div className="border rounded-lg p-4 shadow-xs hover:shadow transition cursor-pointer bg-white">
       <h2 className="font-bold text-lg">{project.name}</h2>
       <p className="text-gray-600 mt-1">{project.description}</p>
       <div className="flex justify-between items-center mt-3">
@@ -34,8 +36,9 @@ const ProjectCard: React.FC<Props> = ({ project, onEdit }) => {
         </span>
       </div>
       <div className='border-t pt-4 mt-2 flex justify-end gap-2'>
-        <Button variant="destructive" className='cursor-pointer' onClick={(() => handleProjectDelete(project.id))}>Delete</Button>
-        <Button variant="outline" className='cursor-pointer' onClick={() => onEdit(project)}>Edit</Button>
+        {user && ['admin', 'manager'].includes(user?.role) && <>   <Button variant="destructive" className='cursor-pointer' onClick={(() => handleProjectDelete(project.id))}>Delete</Button>
+          <Button variant="outline" className='cursor-pointer' onClick={() => onEdit(project)}>Edit</Button></>}
+
         <Button variant="outline" className='cursor-pointer' onClick={() => handleProjectClick(project.id)}>View</Button>
       </div>
     </div>

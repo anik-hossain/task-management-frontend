@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { MoreVertical } from "lucide-react";
 import getBadgeColor from "@/utils/getStatusBadgeClass";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {Task } from "@/types/global";
 
 interface TaskCardProps {
@@ -20,6 +20,13 @@ interface TaskCardProps {
 }
 
 const TaskCard: FC<TaskCardProps> = ({ task }) => {
+
+  const navigate = useNavigate()
+
+  const handleNavigation = () => {
+    navigate(`/tasks/${task.id}`)
+  }
+
   const priorityColors: Record<string, string> = {
     low: "bg-green-300 text-green-800",
     medium: "bg-yellow-300 text-yellow-800",
@@ -27,7 +34,7 @@ const TaskCard: FC<TaskCardProps> = ({ task }) => {
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-4 hover:shadow-md transition-shadow duration-200 flex justify-between items-center">
+    <div className="bg-white shadow rounded-lg p-4 hover:shadow-md transition-shadow duration-200 flex justify-between items-center cursor-pointer" onClick={handleNavigation}>
       <div>
         <h2 className="text-lg font-semibold">{task.title}</h2>
         <p className="text-sm text-gray-600">{task.description}</p>
@@ -54,18 +61,6 @@ const TaskCard: FC<TaskCardProps> = ({ task }) => {
         <p className="text-xs text-gray-500 font-medium h-fit mt-0.5">
           {Math.max(differenceInDays(parseISO(task.dueDate), new Date()), 0)} Days Left
         </p>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="p-2 rounded-full hover:bg-gray-100">
-              <MoreVertical className="w-4 h-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem asChild>
-              <Link to={`/tasks/${task.id}`}>View</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </div>
   );

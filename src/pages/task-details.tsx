@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -32,33 +32,38 @@ const allowedTransitions: Record<string, Record<string, string[]>> = {
   },
 };
 
-const TaskDetails: React.FC = () => {
+const TaskDetails: FC = () => {
   const navigate = useNavigate();
   const { taskId } = useParams<{ taskId: string }>();
   const [task, setTask] = useState<Task | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
+  const { user } = useAuth();
 
-  // Get current user role from Redux (adjust if using context or another store)
-  const { user } = useAuth()
+  const fetchTaskDetails = async () => {
+    try {
+      const response = (await apiService.get(`/tasks/task/${taskId}`)) as Task;
+      setTask(response);
+    } catch (error) {
+      console.error("Failed to fetch task:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchTaskDetails = async () => {
-      try {
-        const response = (await apiService.get(`/tasks/task/${taskId}`)) as Task;
-        setTask(response);
-      } catch (error) {
-        console.error("Failed to fetch task:", error);
-      }
-    };
     fetchTaskDetails();
   }, [taskId]);
 
   const handleChangeStatus = async (newStatus: "pending" | "in-progress" | "completed") => {
     if (!task) return;
+
+    setLoadingStatus(newStatus);
     try {
       await apiService.patch(`/tasks/${task.id}/status`, { status: newStatus });
       setTask((prev) => (prev ? { ...prev, status: newStatus } : null));
     } catch (error) {
       console.error("Failed to update status:", error);
+    } finally {
+      setLoadingStatus(null);
+      fetchTaskDetails()
     }
   };
 
@@ -68,11 +73,7 @@ const TaskDetails: React.FC = () => {
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
-      <Button
-        variant="outline"
-        className="flex items-center gap-2 mb-4"
-        onClick={() => navigate(-1)}
-      >
+      <Button variant="outline" className="flex items-center gap-2 mb-4" onClick={() => navigate(-1)}>
         Back
       </Button>
 
@@ -81,13 +82,12 @@ const TaskDetails: React.FC = () => {
           <CardTitle className="flex justify-between items-center">
             {task.title}
             <p
-              className={`px-2.5 py-1 rounded-full capitalize text-xs ${
-                task.priority === "high"
+              className={`px-2.5 py-1 rounded-full capitalize text-xs ${task.priority === "high"
                   ? "bg-red-500 text-white"
                   : task.priority === "medium"
-                  ? "bg-yellow-400 text-white"
-                  : "bg-green-500 text-white"
-              }`}
+                    ? "bg-yellow-400 text-white"
+                    : "bg-green-500 text-white"
+                }`}
             >
               {task.priority}
             </p>
@@ -100,9 +100,7 @@ const TaskDetails: React.FC = () => {
           <div className="flex flex-col gap-2 text-sm text-gray-500">
             <span>
               <strong>Assignee: </strong>
-              <span className="font-medium text-green-500">
-                  {task.assignee.name}
-                </span>
+              <span className="font-medium text-green-500">{task.assignee.name}</span>
             </span>
             <span>
               <strong>Status:</strong>{" "}
@@ -115,12 +113,10 @@ const TaskDetails: React.FC = () => {
               </span>
             </span>
             <span>
-              <strong>Start Date:</strong>{" "}
-              {format(new Date(task.startDate), "MMM dd, yyyy")}
+              <strong>Start Date:</strong> {format(new Date(task.startDate), "MMM dd, yyyy")}
             </span>
             <span>
-              <strong>End Date:</strong>{" "}
-              {format(new Date(task.dueDate), "MMM dd, yyyy")}
+              <strong>End Date:</strong> {format(new Date(task.dueDate), "MMM dd, yyyy")}
             </span>
           </div>
 
@@ -132,25 +128,15 @@ const TaskDetails: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-3 mt-4">
-            {/* @ts-ignore */}
-            {user?.role !== "member" && (
-              <Button
-                variant="default"
-                className="bg-blue-500 text-white hover:bg-blue-600"
-                onClick={() => navigate(`/tasks/${task.id}/edit`)}
-              >
-                Edit Task
-              </Button>
-            )}
-
             {nextStatuses.map((status) => (
               <Button
                 key={status}
                 variant="default"
-                className="bg-green-500 text-white hover:bg-green-600"
+                className="bg-green-500 text-white hover:bg-green-600 cursor-pointer"
                 onClick={() => handleChangeStatus(status as "pending" | "in-progress" | "completed")}
+                disabled={loadingStatus === status} // disable only the button being clicked
               >
-                Mark as {status}
+                {loadingStatus === status ? "Updating..." : `Mark as ${status}`}
               </Button>
             ))}
           </div>
@@ -159,5 +145,6 @@ const TaskDetails: React.FC = () => {
     </div>
   );
 };
+
 
 export default TaskDetails;
